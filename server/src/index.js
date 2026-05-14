@@ -2,6 +2,10 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 
+import authRoutes from "./routes/auth.routes.js";
+import { authMiddleware } from "./middleware/auth.middleware.js";
+
+
 dotenv.config();
 
 const app = express();
@@ -9,14 +13,23 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Basic route to check if the server is running
+// Test route to verify server is running
 app.get("/", (req, res) => {
   res.json({ message: "TrackHire API Running" });
 });
 
+app.get("/api/auth/protected", authMiddleware, (req, res) => {
+  res.json({
+    message: "Protected route accessed",
+    user: req.user,
+  });
+});
+
+// Auth routes
+app.use("/api/auth", authRoutes);
+
 const PORT = process.env.PORT || 5000;
 
-// Start the server
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
-});
+}); 
