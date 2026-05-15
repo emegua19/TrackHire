@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 
 import authRoutes from "./routes/auth.routes.js";
 import { authMiddleware } from "./middleware/auth.middleware.js";
+import applicationRouter from "./routes/application.route.js";
 
 
 dotenv.config();
@@ -27,6 +28,7 @@ app.get("/api/auth/protected", authMiddleware, (req, res) => {
 
 // Auth routes
 app.use("/api/auth", authRoutes);
+app.use("/api/applications", applicationRouter);
 
 const PORT = process.env.PORT || 5000;
 
