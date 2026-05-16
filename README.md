@@ -1,3 +1,12 @@
+Looking at these two conflicting sections, I can see:
+- **Left side (features)**: Complete `TrackHire` application documentation
+- **Right side (main)**: Default React + Vite template README
+
+Since the `features` branch contains the actual project documentation and the `main` branch has only the default Vite template, the correct resolution is to **keep the TrackHire documentation** and **discard the Vite template README**.
+
+Here's the resolved content:
+
+```markdown
 # TrackHire – Job Application Tracker
 
 A simple and organized system to help users track their job and internship applications in one place.
@@ -255,5 +264,11 @@ TrackHire is designed to simplify job search management. It helps users stay org
 
 Yitbarek Geletaw Demissie
 Software Developer
+```
 
+After resolving, you can commit the merge:
+
+```bash
+git add README.md
+git commit -m "Merge features branch: keep TrackHire documentation"
 ```
