@@ -100,3 +100,35 @@ export const loginUser = async (req, res) => {
     });
   }
 };
+
+// Get current logged-in user profile
+export const getCurrentUser = async (req, res) => {
+  try {
+    // req.user is set by authMiddleware
+    const userId = req.user.id;
+
+    // Fetch user from database (exclude password for security)
+    const result = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        createdAt: users.createdAt,
+      })
+      .from(users)
+      .where(eq(users.id, userId));
+
+    if (result.length === 0) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    res.status(200).json(result[0]);
+  } catch (error) {
+    console.error("Get current user error:", error);
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
