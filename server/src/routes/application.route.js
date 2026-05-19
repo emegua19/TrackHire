@@ -1,4 +1,4 @@
-import express, { application } from "express";
+import express from "express";
 
 import {
   createApplication,
@@ -9,13 +9,34 @@ import {
 } from "../controllers/application.controller.js";
 
 import { authMiddleware } from "../middleware/auth.middleware.js";
+import { validate } from "../middleware/validate.middleware.js";
+import { applicationSchema } from "../utils/validators.js";
 
 const applicationRouter = express.Router();
 
-applicationRouter.post("/", authMiddleware, createApplication);
+/**
+ * Application Routes
+ */
+
+// Protected Routes
+applicationRouter.post(
+  "/",
+  authMiddleware,
+  validate(applicationSchema),
+  createApplication
+);
+
 applicationRouter.get("/", authMiddleware, getApplications);
-applicationRouter.put("/:id", authMiddleware, updateApplication);
-applicationRouter.delete("/:id", authMiddleware, deleteApplication);
+
 applicationRouter.get("/stats/dashboard", authMiddleware, getDashboardStats);
+
+applicationRouter.put(
+  "/:uuid",
+  authMiddleware,
+  validate(applicationSchema),
+  updateApplication
+);
+
+applicationRouter.delete("/:uuid", authMiddleware, deleteApplication);
 
 export default applicationRouter;

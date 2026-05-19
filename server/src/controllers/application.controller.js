@@ -2,20 +2,16 @@ import { db } from "../db/db.js";
 import { applications } from "../schema/applications.js";
 import { eq, and, sql } from "drizzle-orm";
 
-// Create a new application
+/**
+ * Application Controller
+ */
+
 export const createApplication = async (req, res) => {
   try {
-    const {
-      company,
-      position,
-      status,
-      applicationDate,
-      jobLink,
-      notes,
-    } = req.body;
+    const { company, position, status, applicationDate, jobLink, notes } = req.body;
 
     await db.insert(applications).values({
-      userId: req.user.id,
+      userId: req.user.uuid,
       company,
       position,
       status,
@@ -25,44 +21,43 @@ export const createApplication = async (req, res) => {
     });
 
     res.status(201).json({
+      success: true,
       message: "Application created successfully",
     });
   } catch (error) {
+    console.error("Create Application Error:", error);
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: "Failed to create application",
     });
   }
 };
 
-// Get all applications for the authenticated user
 export const getApplications = async (req, res) => {
   try {
     const userApplications = await db
       .select()
       .from(applications)
-      .where(eq(applications.userId, req.user.id));
+      .where(eq(applications.userId, req.user.uuid))
+      .orderBy(applications.createdAt, "desc"); // New: Sort by latest first
 
-    res.status(200).json(userApplications);
+    res.status(200).json({
+      success: true,
+      data: userApplications,
+    });
   } catch (error) {
+    console.error("Get Applications Error:", error);
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: "Failed to fetch applications",
     });
   }
 };
 
-// Update an existing application
 export const updateApplication = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    const {
-      company,
-      position,
-      status,
-      applicationDate,
-      jobLink,
-      notes,
-    } = req.body;
+    const { uuid } = req.params;
+    const { company, position, status, applicationDate, jobLink, notes } = req.body;
 
     await db
       .update(applications)
@@ -76,49 +71,53 @@ export const updateApplication = async (req, res) => {
       })
       .where(
         and(
-          eq(applications.id, Number(id)),
-          eq(applications.userId, req.user.id)
+          eq(applications.uuid, uuid),
+          eq(applications.userId, req.user.uuid)
         )
       );
 
     res.status(200).json({
+      success: true,
       message: "Application updated successfully",
     });
   } catch (error) {
+    console.error("Update Application Error:", error);
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: "Failed to update application",
     });
   }
 };
 
-// Delete an application
 export const deleteApplication = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { uuid } = req.params;
 
     await db
       .delete(applications)
       .where(
         and(
-          eq(applications.id, Number(id)),
-          eq(applications.userId, req.user.id)
+          eq(applications.uuid, uuid),
+          eq(applications.userId, req.user.uuid)
         )
       );
 
     res.status(200).json({
+      success: true,
       message: "Application deleted successfully",
     });
   } catch (error) {
+    console.error("Delete Application Error:", error);
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: "Failed to delete application",
     });
   }
 };
 
-// Get dashboard statistics for the authenticated user
 export const getDashboardStats = async (req, res) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user.uuid;
 
     const totalApplications = await db
       .select({ count: sql`count(*)` })
@@ -156,14 +155,19 @@ export const getDashboardStats = async (req, res) => {
       );
 
     res.status(200).json({
-      totalApplications: totalApplications[0].count,
-      acceptedApplications: acceptedApplications[0].count,
-      rejectedApplications: rejectedApplications[0].count,
-      interviewsScheduled: interviewsScheduled[0].count,
+      success: true,
+      data: {
+        totalApplications: totalApplications[0]?.count || 0,
+        acceptedApplications: acceptedApplications[0]?.count || 0,
+        rejectedApplications: rejectedApplications[0]?.count || 0,
+        interviewsScheduled: interviewsScheduled[0]?.count || 0,
+      },
     });
   } catch (error) {
+    console.error("Dashboard Stats Error:", error);
     res.status(500).json({
-      message: error.message,
+      success: false,
+      message: "Failed to fetch dashboard statistics",
     });
   }
 };
