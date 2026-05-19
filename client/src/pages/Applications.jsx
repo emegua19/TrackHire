@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { toast } from "react-toastify";
 import { 
   Plus, Search, Edit2, Trash2, RefreshCw, 
   Bell, User, Settings, LogOut, ArrowLeft 
@@ -37,10 +38,23 @@ const Applications = () => {
       
       const response = await api.get("/applications");
       console.log("✅ Fetched applications:", response.data);
+      
+      // Debug: Log first item to see available fields
+      if (response.data && response.data.length > 0) {
+        console.log("First application data:", response.data[0]);
+        console.log("Available ID fields:", {
+          id: response.data[0].id,
+          uuid: response.data[0].uuid,
+          _id: response.data[0]._id,
+          applicationId: response.data[0].applicationId
+        });
+      }
+      
       setApplications(response.data);
     } catch (error) {
       console.error("Error fetching applications:", error);
       setError("Failed to load applications. Please try again.");
+      toast.error("Failed to load applications");
     } finally {
       setLoading(false);
     }
@@ -55,13 +69,20 @@ const Applications = () => {
   }, [fetchCurrentUser, fetchApplications]);
 
   const handleDelete = async (id) => {
+    if (!id) {
+      toast.error("Invalid application ID");
+      return;
+    }
+    
     if (!window.confirm("Are you sure you want to delete this application?")) return;
+    
     try {
       await api.delete(`/applications/${id}`);
+      toast.success("Application deleted successfully!");
       fetchApplications();
     } catch (error) {
       console.error(error);
-      alert("Failed to delete application");
+      toast.error("Failed to delete application");
     }
   };
 
@@ -115,12 +136,18 @@ const Applications = () => {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
+    toast.info("Logged out successfully");
     navigate("/login");
+  };
+
+  // Helper function to get application ID (handles different possible field names)
+  const getAppId = (app) => {
+    return app.id || app.uuid || app._id || app.applicationId;
   };
 
   return (
     <div className="min-h-screen bg-[#F5F7FB]">
-      {/* Modern Navbar - Same as Dashboard */}
+      {/* Modern Navbar */}
       <nav className="sticky top-0 z-50 border-b border-white/30 bg-white/60 backdrop-blur-xl">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4">
           {/* Left - Logo & Back Button */}
@@ -320,69 +347,92 @@ const Applications = () => {
                     </td>
                   </tr>
                 ) : (
-                  filteredApplications.map((app) => (
-                    <tr key={app.id} className="hover:bg-white/40 transition-colors cursor-pointer" onClick={() => navigate(`/applications/edit/${app.id}`)}>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center gap-4">
-                          <div className={`w-10 h-10 flex items-center justify-center rounded-2xl text-white font-semibold text-lg
-                            ${["bg-blue-600", "bg-emerald-600", "bg-purple-600", "bg-rose-600"][(app.id || 0) % 4]}`}>
-                            {getInitial(app.company)}
+                  filteredApplications.map((app) => {
+                    const appId = getAppId(app);
+                    console.log("Application ID being used:", appId); // Debug log
+                    
+                    return (
+                      <tr 
+                        key={appId} 
+                        className="hover:bg-white/40 transition-colors cursor-pointer" 
+                        onClick={() => {
+                          if (appId) {
+                            navigate(`/applications/edit/${appId}`);
+                          } else {
+                            toast.error("Invalid application ID");
+                          }
+                        }}
+                      >
+                        <td className="px-6 py-5">
+                          <div className="flex items-center gap-4">
+                            <div className={`w-10 h-10 flex items-center justify-center rounded-2xl text-white font-semibold text-lg
+                              ${["bg-blue-600", "bg-emerald-600", "bg-purple-600", "bg-rose-600"][(appId?.length || 0) % 4]}`}>
+                              {getInitial(app.company)}
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900">{app.position}</p>
+                              <p className="text-sm text-gray-500">{app.company}</p>
+                            </div>
                           </div>
-                          <div>
-                            <p className="font-medium text-gray-900">{app.position}</p>
-                            <p className="text-sm text-gray-500">{app.company}</p>
+                        </td>
+                        <td className="px-6 py-5 text-gray-600">
+                          {app.applicationDate 
+                            ? new Date(app.applicationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
+                            : "N/A"}
+                        </td>
+                        <td className="px-6 py-5">
+                          <span className={`inline-flex px-4 py-1.5 text-sm font-medium rounded-full ${getStatusColor(app.status)}`}>
+                            {app.status || "Applied"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-5">
+                          {app.jobLink ? (
+                            <a 
+                              href={app.jobLink} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="text-blue-600 hover:text-blue-800 text-sm truncate max-w-[200px] inline-block"
+                            >
+                              View Job →
+                            </a>
+                          ) : (
+                            <span className="text-gray-400 text-sm">No link</span>
+                          )}
+                        </td>
+                        <td className="px-6 py-5">
+                          <div className="flex items-center justify-center gap-3">
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (appId) {
+                                  navigate(`/applications/edit/${appId}`);
+                                } else {
+                                  toast.error("Invalid application ID");
+                                }
+                              }} 
+                              className="p-2 text-gray-400 hover:text-amber-600 rounded-xl transition-all hover:bg-amber-50"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button 
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (appId) {
+                                  handleDelete(appId);
+                                } else {
+                                  toast.error("Invalid application ID");
+                                }
+                              }} 
+                              className="p-2 text-gray-400 hover:text-red-600 rounded-xl transition-all hover:bg-red-50"
+                            >
+                              <Trash2 size={18} />
+                            </button>
                           </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-5 text-gray-600">
-                        {app.applicationDate 
-                          ? new Date(app.applicationDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) 
-                          : "N/A"}
-                      </td>
-                      <td className="px-6 py-5">
-                        <span className={`inline-flex px-4 py-1.5 text-sm font-medium rounded-full ${getStatusColor(app.status)}`}>
-                          {app.status || "Applied"}
-                        </span>
-                      </td>
-                      <td className="px-6 py-5">
-                        {app.jobLink ? (
-                          <a 
-                            href={app.jobLink} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="text-blue-600 hover:text-blue-800 text-sm truncate max-w-[200px] inline-block"
-                          >
-                            View Job →
-                          </a>
-                        ) : (
-                          <span className="text-gray-400 text-sm">No link</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-5">
-                        <div className="flex items-center justify-center gap-3">
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/applications/edit/${app.id}`);
-                            }} 
-                            className="p-2 text-gray-400 hover:text-amber-600 rounded-xl transition-all hover:bg-amber-50"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDelete(app.id);
-                            }} 
-                            className="p-2 text-gray-400 hover:text-red-600 rounded-xl transition-all hover:bg-red-50"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

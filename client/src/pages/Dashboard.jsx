@@ -243,7 +243,7 @@ const Dashboard = () => {
                     className="fixed inset-0 z-40"
                     onClick={() => setShowDropdown(false)}
                   ></div>
-                  <div className="absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-white/30 bg-white/70 shadow-xl backdrop-blur-2xl">
+                  <div className="absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-white/30 bg-white shadow-xl backdrop-blur-2xl">
                     <button
                       onClick={() => navigate("/profile")}
                       className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-gray-700 transition-all hover:bg-white/60"

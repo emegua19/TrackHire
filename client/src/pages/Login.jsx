@@ -67,9 +67,9 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen relative overflow-hidden bg-[#16394A]">
+    <div className="min-h-screen relative overflow-hidden bg-[#F1F5F9]">
       {/* Background Overlay */}
-      <div className="absolute inset-0 bg-black/20 z-0" />
+      <div className="absolute inset-0 bg-black/25 z-0" />
 
       {/* Background Blur Shapes */}
       <div className="absolute inset-0 flex items-center justify-center z-0 opacity-70">
@@ -83,7 +83,7 @@ const Login = () => {
       </div>
 
       {/* Main Content */}
-      <div className="relative z-10 min-h-screen flex items-center justify-between px-8 lg:px-16">
+      <div className="relative z-10 min-h-screen flex items-center justify-between px-8 lg:px-20">
         {/* Left Side */}
         <div className="hidden lg:flex flex-col justify-between h-[85vh] py-6">
           {/* Logo */}
@@ -109,8 +109,8 @@ const Login = () => {
           </div>
 
           {/* Footer */}
-          <div className="flex items-center gap-4 text-sm text-white/70">
-            <span>© 2024 TrackHire</span>
+          <div className="flex items-center gap-4 text-sm text-white/80">
+            <span>© 2026 TrackHire</span>
             <span>Privacy Policy</span>
             <span>Terms of Service</span>
           </div>
@@ -118,7 +118,7 @@ const Login = () => {
 
         {/* Login Card */}
         <div className="w-full max-w-[420px] mx-auto lg:mx-0">
-          <div className="bg-[#D9D9D9]/90 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/10">
+          <div className="bg-[#F9FAFB]/95 backdrop-blur-xl rounded-2xl p-8 shadow-2xl border border-white/30">
             {/* Heading */}
             <div className="mb-8">
               <h2 className="text-[38px] font-bold text-[#111827] leading-tight">
@@ -150,7 +150,7 @@ const Login = () => {
                   name="email"
                   value={formData.email}
                   onChange={handleChange}
-                  placeholder="student@university.edu"
+                  placeholder="enter your email"
                   required
                   className="w-full h-[48px] px-5 rounded-full bg-white/80 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                 />
@@ -168,7 +168,7 @@ const Login = () => {
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
-                    placeholder="••••••••••••"
+                    placeholder="enter your password"
                     required
                     className="w-full h-[48px] px-5 rounded-full bg-white/80 border border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   />
@@ -194,7 +194,6 @@ const Login = () => {
                     type="checkbox"
                     className="w-4 h-4 rounded-full border-gray-300 text-blue-600 focus:ring-blue-500"
                   />
-
                   Remember me
                 </label>
 
