@@ -9,8 +9,8 @@ import api from "../services/api";
 
 const AddApplication = () => {
   const navigate = useNavigate();
-  const { id } = useParams(); // Get ID from URL for edit mode
-  const isEditMode = !!id;
+  const { uuid } = useParams(); // Get ID from URL for edit mode
+  const isEditMode = !!uuid;
 
   const [user, setUser] = useState(null);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -48,7 +48,7 @@ const AddApplication = () => {
       const fetchApplication = async () => {
         try {
           const response = await api.get("/applications");
-          const application = response.data.find(app => app.id === parseInt(id));
+          const application = response.data.find(app => app.uuid === uuid);
           
           if (application) {
             setFormData({
@@ -75,7 +75,7 @@ const AddApplication = () => {
       };
       fetchApplication();
     }
-  }, [id, isEditMode, navigate]);
+  }, [uuid, isEditMode, navigate]);
 
   const handleChange = (e) => {
     setFormData({
@@ -100,7 +100,7 @@ const AddApplication = () => {
       };
 
       if (isEditMode) {
-        await api.put(`/applications/${id}`, payload);
+        await api.put(`/applications/${uuid}`, payload);
         alert("Application updated successfully!");
       } else {
         await api.post("/applications", payload);
@@ -120,7 +120,7 @@ const AddApplication = () => {
     if (!window.confirm("Are you sure you want to delete this application?")) return;
     
     try {
-      await api.delete(`/applications/${id}`);
+      await api.delete(`/applications/${uuid}`);
       alert("Application deleted successfully!");
       navigate("/applications");
     } catch (error) {
@@ -194,43 +194,54 @@ const AddApplication = () => {
             </button>
 
             {/* User Dropdown */}
-            <div className="relative">
+              <div className="relative">
               <button
                 onClick={() => setShowDropdown(!showDropdown)}
                 className="flex items-center gap-3 rounded-2xl border border-white/40 bg-white/60 px-3 py-2 backdrop-blur-xl transition-all hover:bg-white/80"
               >
-                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br text-lg font-medium text-white ${getAvatarColor(user?.name)}`}>
+                <div className={`flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br ${getAvatarColor(user?.name)} text-lg font-medium text-white`}>
                   {getInitials(user?.name)}
                 </div>
                 <div className="hidden text-left md:block">
-                  <p className="text-sm font-medium">{user?.name || "Loading..."}</p>
+                  <p className="text-sm font-medium">{user?.name || "User"}</p>
                   <p className="-mt-0.5 text-xs text-gray-500">Job Seeker</p>
                 </div>
-                <div className="text-sm text-gray-400">▼</div>
+                {/* Animated Arrow - Changes direction when open */}
+                <div className={`text-sm text-gray-400 transition-transform duration-200 ${showDropdown ? "rotate-180" : "rotate-0"}`}>
+                  ▼
+                </div>
               </button>
 
               {showDropdown && (
                 <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowDropdown(false)}></div>
-                  <div className="absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-white/30 bg-white/70 shadow-xl backdrop-blur-2xl">
-                    <div className="border-b border-gray-200/60 px-5 py-3 md:hidden">
-                      <p className="text-sm font-medium">{user?.name}</p>
-                      <p className="text-xs text-gray-500">{user?.email}</p>
-                    </div>
-                    <button className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-gray-700 transition-all hover:bg-white/60">
+                  <div
+                    className="fixed inset-0 z-40"
+                    onClick={() => setShowDropdown(false)}
+                  ></div>
+                  <div className="absolute right-0 z-50 mt-3 w-56 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+                    <button
+                      onClick={() => navigate("/profile")}
+                      className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-gray-700 transition-all hover:bg-gray-50"
+                    >
                       <User size={16} /> Profile
                     </button>
-                    <button className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-gray-700 transition-all hover:bg-white/60">
+                    <button
+                      onClick={() => navigate("/settings")}
+                      className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-gray-700 transition-all hover:bg-gray-50"
+                    >
                       <Settings size={16} /> Settings
                     </button>
-                    <div className="h-px bg-gray-200/60"></div>
-                    <button onClick={handleLogout} className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-red-600 transition-all hover:bg-red-50/70">
+                    <div className="h-px bg-gray-100"></div>
+                    <button
+                      onClick={handleLogout}
+                      className="flex w-full items-center gap-3 px-5 py-3 text-left text-sm text-red-600 transition-all hover:bg-red-50"
+                    >
                       <LogOut size={16} /> Logout
                     </button>
                   </div>
                 </>
               )}
-            </div>
+              </div>
           </div>
         </div>
       </nav>

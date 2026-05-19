@@ -46,7 +46,7 @@ function App() {
         />
 
         <Route
-          path="/applications/edit/:id"
+          path="/applications/edit/:uuid"
           element={
             <ProtectedRoute>
               <AddApplication />
