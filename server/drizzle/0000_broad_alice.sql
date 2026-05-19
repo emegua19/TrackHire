@@ -1,6 +1,6 @@
 CREATE TABLE "applications" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"user_id" integer NOT NULL,
+	"uuid" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"user_id" uuid NOT NULL,
 	"company" text NOT NULL,
 	"position" text NOT NULL,
 	"status" text DEFAULT 'Applied',
@@ -11,7 +11,7 @@ CREATE TABLE "applications" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" serial PRIMARY KEY NOT NULL,
+	"uuid" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"name" text NOT NULL,
 	"email" text NOT NULL,
 	"password" text NOT NULL,
